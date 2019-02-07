@@ -1,0 +1,67 @@
+//
+// Created by hai on 2/4/19.
+//
+
+#ifndef OBSTACLE_ESTIMATOR_OBSTACLE_FILTER_H
+#define OBSTACLE_ESTIMATOR_OBSTACLE_FILTER_H
+
+// General include
+#include <math.h>
+#include <vector>
+
+// Eigen includes
+#include <Eigen/Dense>
+
+// Ros include
+#include <ros/ros.h>
+
+// Message types
+#include <geometry_msgs/PoseStamped.h>
+#include <std_msgs/Float64.h>
+
+// Custom message includes. Auto-generated from msg/ directory.
+#include <obstacle_estimator/ObstacleStateEstimation.h>
+
+// Define a class, including a constructor, member variables and member functions
+class Obstacle_Filter
+{
+public:
+    //! Constructor, "main" will need to instantiate a ROS nodehandle, then pass it to the constructor
+    explicit Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic);
+
+private:
+    //! Ros node handle
+    ros::NodeHandle     nh_;        // we will need this, to pass between "main" and constructor
+
+    //! Some objects to support subscriber, service, and publisher
+    ros::Subscriber     sub_;
+    ros::Publisher      pub_;
+
+    //! Obstacle measurement
+    std::string         obstacle_sub_topic_;    // sub topic name from measurements (MoCap)
+    Eigen::Vector3d     pos_measured_;
+
+    //! Time information for filter
+    uint32_t            time_stamp_;            // time stamp of current measurement
+    uint32_t            time_stamp_previous_;   // time stamp of last measurement
+    double              dt_;                    // time difference between two measurements
+
+    //! Obstacle estimation
+    std::string                 obstacle_pub_topic_;    // pub topic name after filtering
+    Eigen::Vector3d             pos_estimated_;
+    Eigen::Vector3d             vel_estimated_;
+    Eigen::Matrix<double, 6, 1> state_estimated_;       // estimated state (pos & vel)
+    Eigen::Matrix<double, 6, 6> state_cov_estimated_;   // estimated covariance matrix
+
+    //! Initializations
+    void initializeSubscribers();
+    void initializePublishers();
+
+    //! Subscriber callback
+    void subscriberCallback(const geometry_msgs::PoseStamped &msg);
+
+};
+
+
+
+#endif //OBSTACLE_ESTIMATOR_OBSTACLE_FILTER_H
