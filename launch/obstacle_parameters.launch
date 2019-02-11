@@ -1,6 +1,6 @@
 <launch>
 
-    # load Cartesian controller config
+    # load obstacle config
     <rosparam command="load" file="$(find obstacle_estimator)/config/obstacle.yaml"/>
 
 </launch>

@@ -27,7 +27,7 @@ class Obstacle_Filter
 {
 public:
     //! Constructor, "main" will need to instantiate a ROS nodehandle, then pass it to the constructor
-    explicit Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic);
+    explicit Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic, double node_rate);
 
 private:
     //! Ros node handle
@@ -36,6 +36,7 @@ private:
     //! Some objects to support subscriber, service, and publisher
     ros::Subscriber     sub_;
     ros::Publisher      pub_;
+    double              node_rate_;             // node rate
 
     //! Obstacle measurement
     std::string         obstacle_sub_topic_;    // sub topic name from measurements (MoCap)

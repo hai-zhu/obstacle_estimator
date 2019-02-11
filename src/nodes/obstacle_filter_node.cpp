@@ -11,10 +11,10 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;                             // create a node handle
 
     // Set parameters
-    double pub_rate;                               // publisher rate
-    if (!nh.getParam("/pub_rate", pub_rate))
+    double node_rate;                               // node rate
+    if (!nh.getParam("/node_rate", node_rate))
     {
-        ROS_ERROR_STREAM("obstacle_filter_node Parameter " << ros::this_node::getName()+"/pub_rate not set");
+        ROS_ERROR_STREAM("obstacle_filter_node Parameter " << ros::this_node::getName()+"/node_rate not set");
         return 0;
     }
 
@@ -33,10 +33,16 @@ int main(int argc, char **argv)
     }
 
     // Initialize a class object and pass node handle for constructor
-    Obstacle_Filter obstacle_filter(nh, sub_topic, pub_topic);
+    Obstacle_Filter obstacle_filter(nh, sub_topic, pub_topic, node_rate);
 
     // Let ROS handle all callbacks
-    ros::spin();
+    ros::Rate loop_rate(node_rate);
+    while (ros::ok())
+    {
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+
 
     return 0;
 }

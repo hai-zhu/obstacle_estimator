@@ -1,16 +1,16 @@
 # Definitions of traceable obstacles
 # Identifier corresponds to Traceable ID set in MoCap
 
-# publisher rate
-pub_rate: 100
+# node rate
+node_rate: 100
 
 obstacle:
 #    '11':
-#      pose_measured: Target1/pose                         # subscriber topic name
-#      state_estimation: Target1/obstacleStateEstimation   # publisher topic name
+#      pose_measured: /Target1/pose                         # subscriber topic name
+#      state_estimation: /Target1/obstacleStateEstimation   # publisher topic name
 #    '12'
-      pose_measured: Target2/pose
-      state_estimation: Target2/obstacleStateEstimation
+      pose_measured: /Target2/pose
+      state_estimation: /Target2/obstacleStateEstimation
 #    '13'
-#      pose_measured: Target3/pose
-#      state_estimation: Target3/obstacleStateEstimation
+#      pose_measured: /Target3/pose
+#      state_estimation: /Target3/obstacleStateEstimation

@@ -6,8 +6,8 @@
 #include <obstacle_estimator/obstacle_filter.h>
 
 // Constructor:  this will get called whenever an instance of this class is created
-Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic)
-    : nh_(nh), obstacle_sub_topic_(sub_topic), obstacle_pub_topic_(pub_topic)
+Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic, double node_rate)
+    : nh_(nh), obstacle_sub_topic_(sub_topic), obstacle_pub_topic_(pub_topic), node_rate_(node_rate)
 {
     ROS_INFO("In class constructor of Obstacle_Filter");
 
@@ -31,7 +31,9 @@ Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std:
     state_estimated_.setZero();
     time_stamp_ = 0;
     time_stamp_previous_ = 0;
-    dt_ = 0.001;
+
+    // discrete time using in the filter, delta_t
+    dt_ = 1.0 / node_rate_;
 }
 
 
@@ -39,7 +41,7 @@ Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std:
 void Obstacle_Filter::initializeSubscribers()
 {
     ROS_INFO("Initializing subscribers");
-    sub_ = nh_.subscribe(obstacle_sub_topic_, 10, &Obstacle_Filter::subscriberCallback, this);
+    sub_ = nh_.subscribe(obstacle_sub_topic_, 1, &Obstacle_Filter::subscriberCallback, this);
     ROS_INFO_STREAM(obstacle_sub_topic_);
 }
 
@@ -48,7 +50,8 @@ void Obstacle_Filter::initializeSubscribers()
 void Obstacle_Filter::initializePublishers()
 {
     ROS_INFO("Initializing publishers");
-    pub_ = nh_.advertise<obstacle_estimator::ObstacleStateEstimation>(obstacle_pub_topic_, 10, true);
+    pub_ = nh_.advertise<obstacle_estimator::ObstacleStateEstimation>(obstacle_pub_topic_, 1, true);
+    ROS_INFO_STREAM(obstacle_pub_topic_);
 }
 
 
@@ -59,17 +62,19 @@ void Obstacle_Filter::subscriberCallback(const geometry_msgs::PoseStamped &msg)
     // it wakes up every time a new message is published on obstacle_sub_topic_
 
     // for debugging
-    ROS_INFO("Filtering");
+    // ROS_INFO("Filtering");
 
     // get measured position
     pos_measured_(0) = msg.pose.position.x;
     pos_measured_(1) = msg.pose.position.y;
     pos_measured_(2) = msg.pose.position.z;
+
+    // current time stamp of the message
     time_stamp_      = msg.header.stamp.nsec;
 
-    // time difference
-    dt_ = (double)time_stamp_ - (double)time_stamp_previous_;   // nano sec
-    dt_ = dt_ * 10E9;                                           // sec
+    // time difference, using the node_rate to derive, then comment the following lines
+//    dt_ = (double)time_stamp_ - (double)time_stamp_previous_;   // nano sec
+//    dt_ = dt_ / 10E9;                                           // sec
 
     // perform Kalman Filtering
     // matrix of state transition model
@@ -113,21 +118,22 @@ void Obstacle_Filter::subscriberCallback(const geometry_msgs::PoseStamped &msg)
          0, 0, 0, 0, 0, Q_vel;
 
     // prediction
-    Eigen::Vector3d u(0);
+    Eigen::Vector3d u(0, 0, 0);
     state_estimated_ = A*state_estimated_ + B*u;
     state_cov_estimated_ = A*state_cov_estimated_*A.transpose() + Q;
 
     // update
-    Eigen::VectorXd state_residual(6);  // state estimation residual
-    state_residual = pos_measured_ - H * state_estimated_;
+    Eigen::Vector3d pos_residual;       // pos estimation residual
+    pos_residual = pos_measured_ - H * state_estimated_;
     Eigen::Matrix<double, 3, 3> S;
     S = H*state_cov_estimated_*H.transpose() + R;
     Eigen::Matrix<double, 6, 3> K;      // the Kalman gain matrix
     K = (state_cov_estimated_*H.transpose()) * S.inverse();
     // new estimated state
-    state_estimated_ = state_estimated_ + K*state_residual;
+    state_estimated_ = state_estimated_ + K*pos_residual;
     // new covariance
     Eigen::Matrix<double, 6, 6> I;
+    I.setIdentity();                    // I is an identity matrix
     state_cov_estimated_ = (I - K*H) * state_cov_estimated_;
 
     // prepare published message
