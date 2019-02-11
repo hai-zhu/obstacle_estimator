@@ -6,8 +6,8 @@ pub_rate: 100
 
 obstacle:
 #    '11':
-      pose_measured: Target1/pose                         # subscriber topic name
-      state_estimation: Target1/obstacleStateEstimation   # publisher topic name
+      pose_measured: /Target1/pose                         # subscriber topic name
+      state_estimation: /Target1/obstacleStateEstimation   # publisher topic name
 #    '12'
 #      pose_measured: Target2/pose
 #      state_estimation: Target2/obstacleStateEstimation

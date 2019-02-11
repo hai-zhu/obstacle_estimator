@@ -48,8 +48,6 @@ private:
 
     //! Obstacle estimation
     std::string                 obstacle_pub_topic_;    // pub topic name after filtering
-    Eigen::Vector3d             pos_estimated_;
-    Eigen::Vector3d             vel_estimated_;
     Eigen::Matrix<double, 6, 1> state_estimated_;       // estimated state (pos & vel)
     Eigen::Matrix<double, 6, 6> state_cov_estimated_;   // estimated covariance matrix
 

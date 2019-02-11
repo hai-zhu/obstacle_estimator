@@ -18,6 +18,7 @@ Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std:
     // Initialization the state covariance, this is important for starting the Kalman filter
     double cov_pos = 10E0;
     double cov_vel = 10E1;
+    state_cov_estimated_.setZero();
     state_cov_estimated_(0, 0) = cov_pos;
     state_cov_estimated_(1, 1) = cov_pos;
     state_cov_estimated_(2, 2) = cov_pos;
@@ -25,6 +26,9 @@ Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std:
     state_cov_estimated_(4, 4) = cov_vel;
     state_cov_estimated_(5, 5) = cov_vel;
 
+    // Other initialization
+    pos_measured_.setZero();
+    state_estimated_.setZero();
     time_stamp_ = 0;
     time_stamp_previous_ = 0;
     dt_ = 0.001;
@@ -36,6 +40,7 @@ void Obstacle_Filter::initializeSubscribers()
 {
     ROS_INFO("Initializing subscribers");
     sub_ = nh_.subscribe(obstacle_sub_topic_, 10, &Obstacle_Filter::subscriberCallback, this);
+    ROS_INFO_STREAM(obstacle_sub_topic_);
 }
 
 
@@ -52,6 +57,9 @@ void Obstacle_Filter::subscriberCallback(const geometry_msgs::PoseStamped &msg)
 {
     // the real work is done in this callback function
     // it wakes up every time a new message is published on obstacle_sub_topic_
+
+    // for debugging
+    ROS_INFO("Filtering");
 
     // get measured position
     pos_measured_(0) = msg.pose.position.x;
