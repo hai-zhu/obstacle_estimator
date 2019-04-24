@@ -45,8 +45,8 @@ private:
     Eigen::Vector3d     pos_measured_;          // measured position information
 
     //! Time information for filter
-    uint32_t            time_stamp_;            // time stamp of current measurement
-    uint32_t            time_stamp_previous_;   // time stamp of last measurement
+    ros::Time           time_stamp_;            // time stamp of current measurement
+    ros::Time           time_stamp_previous_;   // time stamp of last measurement
     double              dt_;                    // time difference between two measurements
 
     //! Time information for predictor

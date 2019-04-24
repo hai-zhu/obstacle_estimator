@@ -28,11 +28,12 @@ Obstacle_Prediction::Obstacle_Prediction(ros::NodeHandle nh, std::string sub_top
     // Other initialization
     pos_measured_.setZero();
     state_estimated_.setZero();
-    time_stamp_ = 0;
-    time_stamp_previous_ = 0;
+
+    time_stamp_ = ros::Time::now();
+    time_stamp_previous_ = ros::Time::now();
 
     // discrete time using in the filter, delta_t
-    dt_ = 1.0 / node_rate_;
+//     dt_ = 1.0 / node_rate_;
 }
 
 
@@ -69,10 +70,10 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
     pos_measured_(2) = msg.pose.position.z;
 
     // current time stamp of the message
-    time_stamp_      = msg.header.stamp.sec;
+    time_stamp_      = msg.header.stamp;
 
     // time difference. If using the node_rate to derive, then comment the following lines
-    // dt_ = (double)time_stamp_ - (double)time_stamp_previous_;   // sec
+    dt_ = (time_stamp_ - time_stamp_previous_).toSec();   // sec
 
     // perform Kalman Filtering
     // matrix of state transition model

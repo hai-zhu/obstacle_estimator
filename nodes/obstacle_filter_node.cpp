@@ -37,15 +37,15 @@ int main(int argc, char **argv)
 
     // Let ROS handle all callbacks
     // specify the publishing rate
-    ros::Rate loop_rate(node_rate);
-    while (ros::ok())
-    {
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+    // ros::Rate loop_rate(node_rate);
+    // while (ros::ok())
+    // {
+    //     ros::spinOnce();
+    //     loop_rate.sleep();
+    // }
 
     // not specify the publishing rate
-    // ros::spin();
+    ros::spin();
 
 
     return 0;
