@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
         rospy
         std_msgs
         geometry_msgs
+        nav_msgs
         message_generation
 )
 
@@ -50,10 +51,9 @@ find_package(Eigen3 REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   ObstacleStateEstimation.msg
- )
+add_message_files(
+        FILES
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -70,11 +70,12 @@ find_package(Eigen3 REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs
-   geometry_msgs
- )
+generate_messages(
+        DEPENDENCIES
+        std_msgs
+        geometry_msgs
+        nav_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -126,8 +127,10 @@ include_directories(
 )
 
 
-add_executable(obstacle_filter_node src/nodes/obstacle_filter_node.cpp src/obstacle_filter.cpp)
+add_executable(obstacle_filter_node nodes/obstacle_filter_node.cpp src/obstacle_filter.cpp)
 target_link_libraries(obstacle_filter_node ${catkin_LIBRARIES})
+add_executable(obstacle_prediction_node nodes/obstacle_prediction_node.cpp src/obstacle_prediction.cpp)
+target_link_libraries(obstacle_prediction_node ${catkin_LIBRARIES})
 #add_dependencies()
 
 
@@ -178,3 +181,8 @@ target_link_libraries(obstacle_filter_node ${catkin_LIBRARIES})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+## For debugging
+set (CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}  -g ")
+set (CMAKE_VERBOSE_MAKEFILE ON)

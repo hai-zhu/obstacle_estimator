@@ -1,0 +1,11 @@
+# Definitions of traceable obstacles
+# Identifier corresponds to Traceable ID set in MoCap
+
+obstacle_filter_node:
+      node_rate: 100                                              # node rate
+      delta_t: 0.05                                               # time step of the prediction
+      horizon_N: 30                                               # prediction horizon length
+      obstacle:
+            pose_measured: /Target1/pose                          # subscriber topic name
+            state_estimation: /Target1/obstacleStateEstimation    # publisher topic name
+            state_prediction: /Target1/obstacleStatePrediction

@@ -18,9 +18,10 @@
 // Message types
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Float64.h>
+#include <nav_msgs/Odometry.h>
 
 // Custom message includes. Auto-generated from msg/ directory.
-#include <obstacle_estimator/ObstacleStateEstimation.h>
+
 
 // Define a class, including a constructor, member variables and member functions
 class Obstacle_Filter
@@ -40,7 +41,7 @@ private:
 
     //! Obstacle measurement
     std::string         obstacle_sub_topic_;    // sub topic name from measurements (MoCap)
-    Eigen::Vector3d     pos_measured_;
+    Eigen::Vector3d     pos_measured_;          // measured position information
 
     //! Time information for filter
     uint32_t            time_stamp_;            // time stamp of current measurement

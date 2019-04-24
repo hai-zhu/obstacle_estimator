@@ -1,5 +1,5 @@
 //
-// Created by hai on 2/5/19.
+// Created by hai on 2/4/19.
 //
 
 
@@ -16,8 +16,8 @@ Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std:
     initializePublishers();
 
     // Initialization the state covariance, this is important for starting the Kalman filter
-    double cov_pos = 10E0;
-    double cov_vel = 10E1;
+    double cov_pos = 1^2;
+    double cov_vel = 1^2;
     state_cov_estimated_.setZero();
     state_cov_estimated_(0, 0) = cov_pos;
     state_cov_estimated_(1, 1) = cov_pos;
@@ -50,7 +50,7 @@ void Obstacle_Filter::initializeSubscribers()
 void Obstacle_Filter::initializePublishers()
 {
     ROS_INFO("Initializing publishers");
-    pub_ = nh_.advertise<obstacle_estimator::ObstacleStateEstimation>(obstacle_pub_topic_, 1, true);
+    pub_ = nh_.advertise<nav_msgs::Odometry>(obstacle_pub_topic_, 1, true);
     ROS_INFO_STREAM(obstacle_pub_topic_);
 }
 
@@ -72,9 +72,9 @@ void Obstacle_Filter::subscriberCallback(const geometry_msgs::PoseStamped &msg)
     // current time stamp of the message
     time_stamp_      = msg.header.stamp.nsec;
 
-    // time difference, using the node_rate to derive, then comment the following lines
-//    dt_ = (double)time_stamp_ - (double)time_stamp_previous_;   // nano sec
-//    dt_ = dt_ / 10E9;                                           // sec
+    // time difference. If using the node_rate to derive, then comment the following lines
+    // dt_ = (double)time_stamp_ - (double)time_stamp_previous_;   // nano sec
+    // dt_ = dt_ / 10E9;                                           // sec
 
     // perform Kalman Filtering
     // matrix of state transition model
@@ -135,24 +135,41 @@ void Obstacle_Filter::subscriberCallback(const geometry_msgs::PoseStamped &msg)
     Eigen::Matrix<double, 6, 6> I;
     I.setIdentity();                    // I is an identity matrix
     state_cov_estimated_ = (I - K*H) * state_cov_estimated_;
+    // save covariance as an array, cov is symmetric, thus its row and column major representation are the same
+    Eigen::Map<Eigen::RowVectorXd> state_cov_vector(state_cov_estimated_.data(), state_cov_estimated_.size());
 
     // prepare published message
-    obstacle_estimator::ObstacleStateEstimation msg_pub;// published obstacle state estimation
+    nav_msgs::Odometry msg_pub;                         // published obstacle state estimation
     msg_pub.header = msg.header;                        // save the header information
-    msg_pub.pose.orientation = msg.pose.orientation;    // save the quaternion information
-    msg_pub.pose.position.x = state_estimated_(0);      // update to the estimated position
-    msg_pub.pose.position.y = state_estimated_(1);
-    msg_pub.pose.position.z = state_estimated_(2);
-    msg_pub.velocity.linear.x = state_estimated_(3);    // save the estimated velocity
-    msg_pub.velocity.linear.y = state_estimated_(4);
-    msg_pub.velocity.linear.z = state_estimated_(5);
-    // save the estimated state covariance (6x6 matrix) as an array
-    // cov is symmetric, thus its row and column major representation are the same
-    Eigen::Map<Eigen::RowVectorXd> state_cov_vector(state_cov_estimated_.data(), state_cov_estimated_.size());
-    for(int i = 0; i++; i < 36)
-    {
-        msg_pub.covariance[i] = state_cov_vector(i);
-    }
+    msg_pub.pose.pose.orientation = msg.pose.orientation;
+    msg_pub.pose.pose.position.x = state_estimated_(0); // save the estimated position
+    msg_pub.pose.pose.position.y = state_estimated_(1);
+    msg_pub.pose.pose.position.z = state_estimated_(2);
+    msg_pub.twist.twist.linear.x = state_estimated_(3); // save the estimated velocity
+    msg_pub.twist.twist.linear.y = state_estimated_(4);
+    msg_pub.twist.twist.linear.z = state_estimated_(5);
+
+    // save the estimated position and velocity covariance
+    // position covariance
+    msg_pub.pose.covariance[0] = state_cov_estimated_(0,0);
+    msg_pub.pose.covariance[1] = state_cov_estimated_(0,1);
+    msg_pub.pose.covariance[2] = state_cov_estimated_(0,2);
+    msg_pub.pose.covariance[6] = state_cov_estimated_(1,0);
+    msg_pub.pose.covariance[7] = state_cov_estimated_(1,1);
+    msg_pub.pose.covariance[8] = state_cov_estimated_(1,2);
+    msg_pub.pose.covariance[12] = state_cov_estimated_(2,0);
+    msg_pub.pose.covariance[13] = state_cov_estimated_(2,1);
+    msg_pub.pose.covariance[14] = state_cov_estimated_(2,2);
+    // velocity covariance
+    msg_pub.twist.covariance[0] = state_cov_estimated_(3,3);
+    msg_pub.twist.covariance[1] = state_cov_estimated_(3,4);
+    msg_pub.twist.covariance[2] = state_cov_estimated_(3,5);
+    msg_pub.twist.covariance[6] = state_cov_estimated_(4,3);
+    msg_pub.twist.covariance[7] = state_cov_estimated_(4,4);
+    msg_pub.twist.covariance[8] = state_cov_estimated_(4,5);
+    msg_pub.twist.covariance[12] = state_cov_estimated_(5,3);
+    msg_pub.twist.covariance[13] = state_cov_estimated_(5,4);
+    msg_pub.twist.covariance[14] = state_cov_estimated_(5,5);
 
     // publish the message
     pub_.publish(msg_pub);
@@ -160,5 +177,3 @@ void Obstacle_Filter::subscriberCallback(const geometry_msgs::PoseStamped &msg)
     // set time
     time_stamp_previous_ = time_stamp_;
 }
-
-

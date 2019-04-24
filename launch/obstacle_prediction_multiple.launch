@@ -1,0 +1,26 @@
+<launch>
+	<arg name="obstacle_config_file_1"
+		 default="$(find obstacle_estimator)/config/obstacle_1.yaml" />
+
+	<arg name="obstacle_config_file_2"
+		 default="$(find obstacle_estimator)/config/obstacle_2.yaml" />
+
+  	<node 	pkg="obstacle_estimator"
+    		type="obstacle_prediction_node"
+    		name="obstacle_prediction_node_1"
+    		respawn="false"
+    		launch-prefix=""
+    		required="true">
+		<rosparam file="$(arg obstacle_config_file_1)" command="load" />
+  	</node>
+
+	<node 	pkg="obstacle_estimator"
+			 type="obstacle_prediction_node"
+			 name="obstacle_prediction_node_2"
+			 respawn="false"
+			 launch-prefix=""
+			 required="true">
+		<rosparam file="$(arg obstacle_config_file_2)" command="load" />
+	</node>
+
+</launch>
