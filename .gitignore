@@ -4,3 +4,11 @@ cmake-build-debug/
 \.idea/
 
 \.vscode/
+
+test/cable_100Hz\.bag
+
+test/cable_reactive\.bag
+
+test/wifi_100Hz\.bag
+
+test/wifi_reactive\.bag
