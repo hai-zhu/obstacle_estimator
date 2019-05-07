@@ -141,11 +141,11 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
     msg_pub.header = msg.header;                        // save the header information, including current frame_id and time stamp
     // The first (0) stores the current estimated position
     msg_pub.poses[0].header = msg.header;
-    msg_pub.poses[0].pose.position.x = state_cov_estimated_(0);
-    msg_pub.poses[0].pose.position.y = state_cov_estimated_(1);
-    msg_pub.poses[0].pose.position.z = state_cov_estimated_(2);
+    msg_pub.poses[0].pose.position.x = state_estimated_(0);
+    msg_pub.poses[0].pose.position.y = state_estimated_(1);
+    msg_pub.poses[0].pose.position.z = state_estimated_(2);
     msg_pub.poses[0].pose.orientation = msg.pose.orientation;
-    // The preform prediction based on constant velocity assumption, only position is predicted
+    // Then preform prediction based on constant velocity assumption, only position is predicted
     Eigen::Matrix<double, 6, 6> F;
     F << 1, 0, 0, delta_t_, 0, 0,
          0, 1, 0, 0, delta_t_, 0,
