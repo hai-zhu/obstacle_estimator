@@ -28,7 +28,7 @@ class Obstacle_Filter
 {
 public:
     //! Constructor, "main" will need to instantiate a ROS nodehandle, then pass it to the constructor
-    explicit Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic, double node_rate);
+    explicit Obstacle_Filter(ros::NodeHandle nh);
 
 private:
     //! Ros node handle
@@ -37,10 +37,8 @@ private:
     //! Some objects to support subscriber, service, and publisher
     ros::Subscriber     sub_;
     ros::Publisher      pub_;
-    double              node_rate_;             // node rate
 
     //! Obstacle measurement
-    std::string         obstacle_sub_topic_;    // sub topic name from measurements (MoCap)
     Eigen::Vector3d     pos_measured_;          // measured position information
 
     //! Time information for filter
@@ -49,7 +47,6 @@ private:
     double              dt_;                    // time difference between two measurements
 
     //! Obstacle estimation
-    std::string                 obstacle_pub_topic_;    // pub topic name after filtering
     Eigen::Matrix<double, 6, 1> state_estimated_;       // estimated state (pos & vel)
     Eigen::Matrix<double, 6, 6> state_cov_estimated_;   // estimated covariance matrix
 

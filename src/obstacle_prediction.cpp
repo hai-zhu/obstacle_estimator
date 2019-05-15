@@ -6,7 +6,7 @@
 #include <obstacle_estimator/obstacle_prediction.h>
 
 // Constructor:  this will get called whenever an instance of this class is created
-Obstacle_Prediction::Obstacle_Prediction(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic, double node_rate, double delta_t, int horizon_N): nh_(nh), obstacle_sub_topic_(sub_topic), obstacle_pub_topic_(pub_topic), node_rate_(node_rate), delta_t_(delta_t), horizon_N_(horizon_N)
+Obstacle_Prediction::Obstacle_Prediction(ros::NodeHandle nh, double delta_t, int horizon_N): nh_(nh), delta_t_(delta_t), horizon_N_(horizon_N)
 {
     ROS_INFO("In class constructor of Obstacle_Prediction");
 
@@ -31,9 +31,7 @@ Obstacle_Prediction::Obstacle_Prediction(ros::NodeHandle nh, std::string sub_top
 
     time_stamp_ = ros::Time::now();
     time_stamp_previous_ = ros::Time::now();
-
-    // discrete time using in the filter, delta_t
-//     dt_ = 1.0 / node_rate_;
+    dt_ = 0.001;
 }
 
 
@@ -41,8 +39,7 @@ Obstacle_Prediction::Obstacle_Prediction(ros::NodeHandle nh, std::string sub_top
 void Obstacle_Prediction::initializeSubscribers()
 {
     ROS_INFO("Initializing subscribers");
-    sub_ = nh_.subscribe(obstacle_sub_topic_, 1, &Obstacle_Prediction::subscriberCallback, this);
-    ROS_INFO_STREAM(obstacle_sub_topic_);
+    sub_ = nh_.subscribe("obstacle/pose", 1, &Obstacle_Prediction::subscriberCallback, this);
 }
 
 
@@ -50,8 +47,7 @@ void Obstacle_Prediction::initializeSubscribers()
 void Obstacle_Prediction::initializePublishers()
 {
     ROS_INFO("Initializing publishers");
-    pub_ = nh_.advertise<nav_msgs::Path>(obstacle_pub_topic_, 1, true);
-    ROS_INFO_STREAM(obstacle_pub_topic_);
+    pub_ = nh_.advertise<nav_msgs::Path>("/obstacle/path_prediction", 1, true);
 }
 
 

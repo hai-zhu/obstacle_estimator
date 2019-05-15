@@ -29,7 +29,7 @@ class Obstacle_Prediction
 {
 public:
     //! Constructor, "main" will need to instantiate a ROS nodehandle, then pass it to the constructor
-    explicit Obstacle_Prediction(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic, double node_rate, double delta_t, int horizon_N);
+    explicit Obstacle_Prediction(ros::NodeHandle nh, double delta_t, int horizon_N);
 
 private:
     //! Ros node handle
@@ -38,10 +38,8 @@ private:
     //! Some objects to support subscriber, service, and publisher
     ros::Subscriber     sub_;
     ros::Publisher      pub_;
-    double              node_rate_;             // node rate
 
     //! Obstacle measurement
-    std::string         obstacle_sub_topic_;    // sub topic name from measurements (MoCap)
     Eigen::Vector3d     pos_measured_;          // measured position information
 
     //! Time information for filter
@@ -54,7 +52,6 @@ private:
     int                 horizon_N_;             // prediction horizon length             
 
     //! Obstacle estimation and prediction
-    std::string                 obstacle_pub_topic_;    // pub topic name after filtering and prediction
     Eigen::Matrix<double, 6, 1> state_estimated_;       // estimated state (pos & vel)
     Eigen::Matrix<double, 6, 6> state_cov_estimated_;   // estimated covariance matrix
 

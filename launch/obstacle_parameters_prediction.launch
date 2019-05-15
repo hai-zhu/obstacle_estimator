@@ -1,6 +1,0 @@
-<launch>
-
-    # load obstacle config
-    <rosparam command="load" file="$(find obstacle_estimator)/config/obstacle_node_prediction.yaml"/>
-
-</launch>

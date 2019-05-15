@@ -1,9 +1,4 @@
 <launch>
-	<arg name="obstacle_config_file_1"
-		 default="$(find obstacle_estimator)/config/obstacle_1.yaml" />
-
-	<arg name="obstacle_config_file_2"
-		 default="$(find obstacle_estimator)/config/obstacle_2.yaml" />
 
   	<node 	pkg="obstacle_estimator"
     		type="obstacle_filter_node"
@@ -11,7 +6,8 @@
     		respawn="false"
     		launch-prefix=""
     		required="true">
-		<rosparam file="$(arg obstacle_config_file_1)" command="load" />
+			<remap from="/obstacle/pose" to="/Target1/pose"/>
+			<remap from="/obstacle/state_estimation" to="/Target1/state_estimation"/>
   	</node>
 
 	<node 	pkg="obstacle_estimator"
@@ -20,7 +16,8 @@
 			 respawn="false"
 			 launch-prefix=""
 			 required="true">
-		<rosparam file="$(arg obstacle_config_file_2)" command="load" />
+			 <remap from="/obstacle/pose" to="/Target2/pose"/>
+			 <remap from="/obstacle/state_estimation" to="/Target2/state_estimation"/>
 	</node>
 
 </launch>

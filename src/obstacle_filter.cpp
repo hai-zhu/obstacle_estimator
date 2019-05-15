@@ -6,8 +6,7 @@
 #include <obstacle_estimator/obstacle_filter.h>
 
 // Constructor:  this will get called whenever an instance of this class is created
-Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std::string pub_topic, double node_rate)
-    : nh_(nh), obstacle_sub_topic_(sub_topic), obstacle_pub_topic_(pub_topic), node_rate_(node_rate)
+Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh): nh_(nh)
 {
     ROS_INFO("In class constructor of Obstacle_Filter");
 
@@ -32,9 +31,8 @@ Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std:
     
     time_stamp_ = ros::Time::now();
     time_stamp_previous_ = ros::Time::now();
+    dt_ = 0.001;
 
-    // discrete time using in the filter, delta_t
-    // dt_ = 1.0 / node_rate_;
 }
 
 
@@ -42,8 +40,7 @@ Obstacle_Filter::Obstacle_Filter(ros::NodeHandle nh, std::string sub_topic, std:
 void Obstacle_Filter::initializeSubscribers()
 {
     ROS_INFO("Initializing subscribers");
-    sub_ = nh_.subscribe(obstacle_sub_topic_, 1, &Obstacle_Filter::subscriberCallback, this);
-    ROS_INFO_STREAM(obstacle_sub_topic_);
+    sub_ = nh_.subscribe("/obstacle/pose", 1, &Obstacle_Filter::subscriberCallback, this);
 }
 
 
@@ -51,8 +48,7 @@ void Obstacle_Filter::initializeSubscribers()
 void Obstacle_Filter::initializePublishers()
 {
     ROS_INFO("Initializing publishers");
-    pub_ = nh_.advertise<nav_msgs::Odometry>(obstacle_pub_topic_, 1, true);
-    ROS_INFO_STREAM(obstacle_pub_topic_);
+    pub_ = nh_.advertise<nav_msgs::Odometry>("/obstacle/state_estimation", 1, true);
 }
 
 
