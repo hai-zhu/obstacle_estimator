@@ -31,7 +31,7 @@ Obstacle_Prediction::Obstacle_Prediction(ros::NodeHandle nh, double delta_t, int
 
     time_stamp_ = ros::Time::now();
     time_stamp_previous_ = ros::Time::now();
-    dt_ = 0.001;
+    dt_ = 0.01;
 }
 
 
