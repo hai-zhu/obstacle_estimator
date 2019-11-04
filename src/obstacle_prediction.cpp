@@ -48,8 +48,8 @@ void Obstacle_Prediction::initializeSubscribers()
 void Obstacle_Prediction::initializePublishers()
 {
     ROS_INFO("Initializing publishers");
-    pub_ = nh_.advertise<nav_msgs::Path>("/obstacle/path_prediction", 1, true);
-//    pub_ = nh_.advertise<nav_msgs::Path>("/Target1/path_prediction", 1, true);     // for debugging
+    pub_ = nh_.advertise<std_msgs::Float64MultiArray>("/obstacle/path_prediction", 1, true);
+//    pub_ = nh_.advertise<std_msgs::Float64MultiArray>("/Target1/path_prediction", 1, true);     // for debugging
 }
 
 
@@ -134,39 +134,27 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
     state_cov_estimated_ = (I - K*H) * state_cov_estimated_;
     
     // Trajectory prediction and prepare published message
-    nav_msgs::Path msg_pub;
-    msg_pub.poses.resize(horizon_N_);
-    msg_pub.header = msg.header;                        // save the header information, including current frame_id and time stamp
-    // The first (0) stores the current estimated position
-    msg_pub.poses[0].header = msg.header;
-    msg_pub.poses[0].pose.position.x = state_estimated_(0);
-    msg_pub.poses[0].pose.position.y = state_estimated_(1);
-    msg_pub.poses[0].pose.position.z = state_estimated_(2);
-    msg_pub.poses[0].pose.orientation = msg.pose.orientation;
-    // Then preform prediction based on constant velocity assumption, only position is predicted
+    std_msgs::Float64MultiArray msg_pub;
+    msg_pub.data.resize(3*horizon_N_);
+    // Preform prediction based on constant velocity assumption, only position is predicted
     Eigen::Matrix<double, 6, 6> F;
     F << 1, 0, 0, delta_t_, 0, 0,
-         0, 1, 0, 0, delta_t_, 0,
-         0, 0, 1, 0, 0, delta_t_,
-         0, 0, 0, 1, 0, 0,
-         0, 0, 0, 0, 1, 0,
-         0, 0, 0, 0, 0, 1;
+            0, 1, 0, 0, delta_t_, 0,
+            0, 0, 1, 0, 0, delta_t_,
+            0, 0, 0, 1, 0, 0,
+            0, 0, 0, 0, 1, 0,
+            0, 0, 0, 0, 0, 1;
     Eigen::Matrix<double, 6, 1> state_now;
     Eigen::Matrix<double, 6, 1> state_next;
     state_now = state_estimated_;
-    ros::Duration delta_t_duration(delta_t_);
-    for (int i = 1; i < horizon_N_; i++)
+    for (int i = 0; i < horizon_N_; i++)
     {
+        // store into the published message
+        msg_pub.data[0 + 3*i] = state_now[0];
+        msg_pub.data[1 + 3*i] = state_now[1];
+        msg_pub.data[2 + 3*i] = state_now[2];
         // predicted state
         state_next = F*state_now;
-        // store into the published message
-        msg_pub.poses[i].pose.orientation = msg.pose.orientation;       // orientation is not used in fact
-        msg_pub.poses[i].pose.position.x = state_next(0);
-        msg_pub.poses[i].pose.position.y = state_next(1);
-        msg_pub.poses[i].pose.position.z = state_next(2);
-        msg_pub.poses[i].header.frame_id = msg.header.frame_id;
-        msg_pub.poses[i].header.seq      = msg_pub.poses[i-1].header.seq + 1;
-        msg_pub.poses[i].header.stamp    = msg_pub.poses[i-1].header.stamp + delta_t_duration;
         // set next to be now
         state_now = state_next;
     }

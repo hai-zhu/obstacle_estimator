@@ -19,6 +19,7 @@
 // Message types
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 
