@@ -17,6 +17,7 @@ int main(int argc, char **argv)
         ROS_ERROR_STREAM("obstacle_prediction_node Parameter " << ros::this_node::getName()+"/delta_t not set");
         return 0;
     }
+//    delta_t = 0.6;     // for debugging
 
     int horizon_N;                                      // prediction horizon length
     if (!nh.getParam(ros::this_node::getName()+"/horizon_N", horizon_N))
@@ -24,6 +25,7 @@ int main(int argc, char **argv)
         ROS_ERROR_STREAM("obstacle_prediction_node Parameter " << ros::this_node::getName()+"/horizon_N not set");
         return 0;
     }
+//    horizon_N = 20;     // for debugging
 
     // Initialize a class object and pass node handle for constructor
     Obstacle_Prediction obstacle_prediction(nh, delta_t, horizon_N);

@@ -39,7 +39,8 @@ Obstacle_Prediction::Obstacle_Prediction(ros::NodeHandle nh, double delta_t, int
 void Obstacle_Prediction::initializeSubscribers()
 {
     ROS_INFO("Initializing subscribers");
-    sub_ = nh_.subscribe("obstacle/pose", 1, &Obstacle_Prediction::subscriberCallback, this);
+    sub_ = nh_.subscribe("/obstacle/pose", 1, &Obstacle_Prediction::subscriberCallback, this);
+//    sub_ = nh_.subscribe("/Target1/pose", 1, &Obstacle_Prediction::subscriberCallback, this);      // for debugging
 }
 
 
@@ -48,6 +49,7 @@ void Obstacle_Prediction::initializePublishers()
 {
     ROS_INFO("Initializing publishers");
     pub_ = nh_.advertise<nav_msgs::Path>("/obstacle/path_prediction", 1, true);
+//    pub_ = nh_.advertise<nav_msgs::Path>("/Target1/path_prediction", 1, true);     // for debugging
 }
 
 
@@ -152,6 +154,7 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
     Eigen::Matrix<double, 6, 1> state_now;
     Eigen::Matrix<double, 6, 1> state_next;
     state_now = state_estimated_;
+    ros::Duration delta_t_duration(delta_t_);
     for (int i = 1; i < horizon_N_; i++)
     {
         // predicted state
@@ -163,8 +166,7 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
         msg_pub.poses[i].pose.position.z = state_next(2);
         msg_pub.poses[i].header.frame_id = msg.header.frame_id;
         msg_pub.poses[i].header.seq      = msg_pub.poses[i-1].header.seq + 1;
-        msg_pub.poses[i].header.stamp.sec= msg_pub.poses[i-1].header.stamp.sec + delta_t_;
-        msg_pub.poses[i].header.stamp.nsec= msg_pub.poses[i-1].header.stamp.nsec + 10E9*delta_t_;
+        msg_pub.poses[i].header.stamp    = msg_pub.poses[i-1].header.stamp + delta_t_duration;
         // set next to be now
         state_now = state_next;
     }
