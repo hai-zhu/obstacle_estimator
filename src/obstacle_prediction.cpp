@@ -49,6 +49,7 @@ void Obstacle_Prediction::initializePublishers()
 {
     ROS_INFO("Initializing publishers");
     pub_ = nh_.advertise<std_msgs::Float64MultiArray>("/obstacle/path_prediction", 1, true);
+    odo_pub_ = nh_.advertise<nav_msgs::Odometry>("/obstacle/state_estimation", 1, true);
 //    pub_ = nh_.advertise<std_msgs::Float64MultiArray>("/Target1/path_prediction", 1, true);     // for debugging
 }
 
@@ -132,7 +133,43 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
     Eigen::Matrix<double, 6, 6> I;
     I.setIdentity();                    // I is an identity matrix
     state_cov_estimated_ = (I - K*H) * state_cov_estimated_;
-    
+
+    // prepare published state estimation message
+    nav_msgs::Odometry est_msg_pub;                         // published obstacle state estimation
+    est_msg_pub.header = msg.header;                        // save the header information
+    est_msg_pub.pose.pose.orientation = msg.pose.orientation;
+    est_msg_pub.pose.pose.position.x = state_estimated_(0); // save the estimated position
+    est_msg_pub.pose.pose.position.y = state_estimated_(1);
+    est_msg_pub.pose.pose.position.z = state_estimated_(2);
+    est_msg_pub.twist.twist.linear.x = state_estimated_(3); // save the estimated velocity
+    est_msg_pub.twist.twist.linear.y = state_estimated_(4);
+    est_msg_pub.twist.twist.linear.z = state_estimated_(5);
+
+    // save the estimated position and velocity covariance
+    // position covariance
+    est_msg_pub.pose.covariance[0] = state_cov_estimated_(0,0);
+    est_msg_pub.pose.covariance[1] = state_cov_estimated_(0,1);
+    est_msg_pub.pose.covariance[2] = state_cov_estimated_(0,2);
+    est_msg_pub.pose.covariance[6] = state_cov_estimated_(1,0);
+    est_msg_pub.pose.covariance[7] = state_cov_estimated_(1,1);
+    est_msg_pub.pose.covariance[8] = state_cov_estimated_(1,2);
+    est_msg_pub.pose.covariance[12] = state_cov_estimated_(2,0);
+    est_msg_pub.pose.covariance[13] = state_cov_estimated_(2,1);
+    est_msg_pub.pose.covariance[14] = state_cov_estimated_(2,2);
+    // velocity covariance
+    est_msg_pub.twist.covariance[0] = state_cov_estimated_(3,3);
+    est_msg_pub.twist.covariance[1] = state_cov_estimated_(3,4);
+    est_msg_pub.twist.covariance[2] = state_cov_estimated_(3,5);
+    est_msg_pub.twist.covariance[6] = state_cov_estimated_(4,3);
+    est_msg_pub.twist.covariance[7] = state_cov_estimated_(4,4);
+    est_msg_pub.twist.covariance[8] = state_cov_estimated_(4,5);
+    est_msg_pub.twist.covariance[12] = state_cov_estimated_(5,3);
+    est_msg_pub.twist.covariance[13] = state_cov_estimated_(5,4);
+    est_msg_pub.twist.covariance[14] = state_cov_estimated_(5,5);
+
+    // publish the message
+    odo_pub_.publish(est_msg_pub);
+
     // Trajectory prediction and prepare published message
     std_msgs::Float64MultiArray msg_pub;
     msg_pub.data.resize(3*horizon_N_);

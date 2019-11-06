@@ -40,6 +40,7 @@ private:
     //! Some objects to support subscriber, service, and publisher
     ros::Subscriber     sub_;
     ros::Publisher      pub_;
+    ros::Publisher      odo_pub_;
 
     //! Obstacle measurement
     Eigen::Vector3d     pos_measured_;          // measured position information
