@@ -64,7 +64,7 @@ void Obstacle_Filter::subscriberCallback(const geometry_msgs::PoseStamped &msg)
     // get measured position
     pos_measured_(0) = msg.pose.position.x;
     pos_measured_(1) = msg.pose.position.y;
-    pos_measured_(2) = msg.pose.position.z;
+    pos_measured_(2) = msg.pose.position.z * 0.5;   // since a hat is wearing
 
     // current time stamp of the message
     time_stamp_      = msg.header.stamp;
