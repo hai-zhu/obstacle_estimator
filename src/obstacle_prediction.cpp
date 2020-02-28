@@ -170,9 +170,16 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
     // publish the message
     odo_pub_.publish(est_msg_pub);
 
+    // compute the current yaw of the obstacle
+    tf::Quaternion quat_measured;
+    Eigen::Matrix<double, 3, 1> euler_measured;
+    tf::quaternionMsgToTF(msg.pose.orientation, quat_measured);
+    tf::Matrix3x3(quat_measured).getRPY(euler_measured(0), euler_measured(1), euler_measured(2));
+    double yaw_measured = euler_measured(2);
+
     // Trajectory prediction and prepare published message
     std_msgs::Float64MultiArray msg_pub;
-    msg_pub.data.resize(3*horizon_N_);
+    msg_pub.data.resize(4*horizon_N_);
     // Preform prediction based on constant velocity assumption, only position is predicted
     Eigen::Matrix<double, 6, 6> F;
     F << 1, 0, 0, delta_t_, 0, 0,
@@ -187,9 +194,10 @@ void Obstacle_Prediction::subscriberCallback(const geometry_msgs::PoseStamped &m
     for (int i = 0; i < horizon_N_; i++)
     {
         // store into the published message
-        msg_pub.data[0 + 3*i] = state_now[0];
-        msg_pub.data[1 + 3*i] = state_now[1];
-        msg_pub.data[2 + 3*i] = state_now[2];
+        msg_pub.data[0 + 4*i] = state_now[0];
+        msg_pub.data[1 + 4*i] = state_now[1];
+        msg_pub.data[2 + 4*i] = state_now[2];
+        msg_pub.data[3 + 4*i] = yaw_measured;   // yaw is assumed to be constant
         // predicted state
         state_next = F*state_now;
         // set next to be now

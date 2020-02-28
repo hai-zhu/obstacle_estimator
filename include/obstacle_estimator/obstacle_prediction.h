@@ -15,6 +15,7 @@
 
 // Ros include
 #include <ros/ros.h>
+#include <tf/transform_datatypes.h>
 
 // Message types
 #include <geometry_msgs/PoseStamped.h>
